@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{graphicx}
+\usepackage{amsmath}
 \graphicspath{ {images/} }
 
 \begin{document}
@@ -40,6 +41,32 @@ The problem can be stated as follows:
 \textbf{Given a question pair, detect if they are duplicate or not.}
 \end{center}
 
-Quora provides a dataset
+The steps to achieving our duplicate detector are as follows:
+
+\begin{enumerate}
+\item{Download and pre-process the Quora training dataset}
+\item{Split the Quora training dataset into 90\% training and 10\% test set.}
+\item{In the 90\% training set, further 10\% will be used as a validation set.}
+\item{Extract usable features from the dataset.}
+\item{Train a binary classifier to differentiate between duplicates/non-duplicates.}
+\item{Provide a command-line interface so that users can check for duplicates from Quora's test set, or provide his own questions.}
+\end{enumerate}
+
+\subsection{Metrics}
+
+Being a classification problem, the metric is going to be accuracy:
+
+$$\text{accuracy} = \frac{\text{true positives} + \text{true negatives}}{\text{total samples}}$$
+
+This accuracy will be measured on the test set (10\% of the total dataset).
+
+
+\section{Analysis}
+
+\subsection{Data Exploration}
+
+Let's look at how the Quora dataset is structured:
+
+\noindent\includegraphics[width=\textwidth]{data_head}
 
 \end{document}

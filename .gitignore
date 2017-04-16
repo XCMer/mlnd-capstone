@@ -6,3 +6,4 @@ report.out
 report.synctex.gz
 report.toc
 train.csv
+.DS_Store
