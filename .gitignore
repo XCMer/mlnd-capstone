@@ -1,0 +1,8 @@
+.ipynb_checkpoints/
+data/
+report.aux
+report.log
+report.out
+report.synctex.gz
+report.toc
+train.csv
