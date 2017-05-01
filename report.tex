@@ -33,6 +33,8 @@ However, users are prone to posting duplicate questions, because not all of them
 
 This project was inspired by Quora's Kaggle challenge\footnote{https://www.kaggle.com/c/quora-question-pairs}. A dataset of question pairs, manually tagged as duplicate or not by human reviewers, has been provided\footnote{https://www.kaggle.com/c/quora-question-pairs} by Quora to train on.
 
+\textbf{For the purpose of this project, the inputs are strictly assumed to be in English.}
+
 \subsection{Problem Statement}
 
 The problem can be stated as follows:
@@ -155,5 +157,68 @@ Let's look at the Jaccard similarity of duplicate and non-duplicate question pai
 \end{enumerate}
 
 We had previously concluded from the word counts that bag-of-words similarity will not be a good method of differentiating between duplicates and non-duplicates, and the two graphs above confirm the fact.
+
+\subsection{Algorithms \& Techniques}
+
+\subsubsection{Feature extraction}
+
+The inputs to our algorithm are two variable length strings. In NLP (Natural Language Processing), there are two primary ways of extracting features from text, after the input has been word-tokenized, that is being split into individual words:
+\\\\
+\noindent\textbf{Bag of words:}\\
+Here, every word is assigned a unique number. The input to any ML algorithm then becomes a one-hot encoded array of numbers that correspond to these words.
+
+For example, if the input corpus has two words: "hello" and "world". And we assign 0 to "hello" and 1 to "world". Then, the word "hello" would be represented as $[1\ 0]$ while "world" would be represented as $[0\ 1]$. (one hot encoded).
+
+The number of features become equal to the number of unique words in the corpus (training set).
+\\\\
+\noindent\textbf{Word vectors:}\\
+The problem with one hot encoding is that we come up with very large feature vectors, since they're one hot encoded. This does not scale to large corpora.
+
+Instead of a sparse array, word vectors convert input words into a fixed-length vector. A common vector size is 300. Thus, every word in the input corpus gets converted into a dense feature vector of length, say, 300, regardless of how many words there are in the corpus.
+
+As opposed to bag of words, word vectors have to be trained on a corpus, before they can be used to extract features from different corpora. Thankfully, there are a lot of pre-trained models for word vectors available.
+
+Two popular algorithms to generate them are Word2Vec\footnote{https://en.wikipedia.org/wiki/Word2vec} and GloVe\footnote{https://nlp.stanford.edu/projects/glove/}. spaCy\footnote{https://spacy.io} comes with a GloVe model\footnote{https://spacy.io/docs/usage/word-vectors-similarities} of 300-dimensional vectors trained on the Common Crawl corpus. This is the Python library that we will use to do all our processing.
+
+Naturally, I'll be using the word vectors approach, since it also allows me to train for words that don't appear in the Quora training corpus, but a similar word does.
+
+\subsubsection{Pooling}
+
+Given a pair of questions, the questions themselves can be of different sizes. If we get word vectors for each word in the question, then we get a matrix of size $m \times 300$, where we're assuming that $300$ is the word vector size and $m$ is the number of words in the question.
+
+However, for a pair, $m$ could be different. Thus, we need a way to normalize this. There are two ways\footnote{https://explosion.ai/blog/quora-deep-text-pair-classification\#example-neural-network}:
+
+\begin{enumerate}
+\item{\textbf{Max pooling:} Take the maximum of each column in the $m \times 300$ matrix to get a $1 \times 300$ matrix.}
+\item{\textbf{Mean pooling:} Take the mean of each column in the $m \times 300$ matrix to get a $1 \times 300$ matrix.}
+\end{enumerate}
+
+Max pooling is reported to perform better\footnote{https://explosion.ai/blog/quora-deep-text-pair-classification\#results}. However, I've decided to concatenate mean and max pooling to get a matrix $1 \times 600$ in dimension. Thus, every question is converted into 600-dimensional vector.
+
+\subsubsection{Neural Networks}
+
+We will be using Neural Networks to create our model. Neural Networks, especially deep ones, have lately become popular in the field of NLP.\footnote{http://colah.github.io/posts/2014-07-NLP-RNNs-Representations} \footnote{https://www.quora.com/How-are-neural-networks-used-in-Natural-Language-Processing} \footnote{https://nlp.stanford.edu/projects/DeepLearningInNaturalLanguageProcessing.shtml}
+
+A neural network learns to model functions, just like supervised algorithms. However, the deeper the neural network (deeper meaning more number of layers), the more complex characteristics it can detect in the input.
+
+A downside to neural networks is that it is incredibly difficult to correctly design them. The network structure itself has many possibilities, and then we also have a number of hyperparameters like epochs, depending on the optimizer being used. They also take a long time to train.
+
+\subsubsection{Improving Neural Network Accuracy}
+
+There are several techniques in neural networks to improve the accuracy of the network, or to reduce overfitting.
+\\\\
+\textbf{Dropout:}\\
+Here, random units inside of the network are switched off in every epoch. Thus, the network is forced to learn redundant representations of the input. This, in totality, avoids overfitting. Dropout only happens during training, and is switched off when running the model in production.\footnote{https://www.quora.com/How-does-the-dropout-method-work-in-deep-learning} \footnote{https://www.cs.toronto.edu/~hinton/absps/JMLRdropout.pdf}
+
+Due to the low amount of training data that we have, I'm not using dropouts in my network.
+\\\\
+\textbf{Batch Normalization:}\\
+A Batch Normalization layer shifts the inputs from the previous layer to have zero-mean and unit-variance. This prevents data flowing in the network to not become too big or too small. It is said to result in higher accuracy and faster learning (convergence).\footnote{https://www.quora.com/Why-does-batch-normalization-help} To try this out, I trained variants of my network with Batch Normalization on and off.
+
+\subsection{Benchmark}
+
+In the field of Information Retrieval, there is a problem called Near Duplicate Detection.\footnote{https://nlp.stanford.edu/IR-book/html/htmledition/near-duplicates-and-shingling-1.html} Jaccard Similarity of bag-of-words ($k=1$ shinglings) is one way of finding near duplicates.\footnote{http://stackoverflow.com/questions/23053688/how-to-detect-duplicates-among-text-documents-and-return-the-duplicates-similar}
+
+Since we split Quora dataset into 10\% test set, this benchmark model would be run on the test set. This baseline model gives an accuracy of $65.153\%$.
 
 \end{document}
