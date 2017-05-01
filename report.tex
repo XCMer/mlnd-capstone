@@ -292,7 +292,7 @@ To find the right network topology that will improve accuracy, we will try a cou
 \begin{enumerate}
 \item{Number of training units: 2, 4, 6, 8}
 \item{Number of neurons in the dense layer: 100, 200, 300}
-\item{Batch normalization: On, Off}
+\item{Batch normalization: True, False}
 \end{enumerate}
 
 This gives rise to 24 combinations. We will train the neural network on all of those topologies. The number of epochs is set to 25, because that is the maximum I have the resources to train 24 neural networks on. However, the training and validation accuracy of each epoch is put in a log, so that we can always check later for patterns of overfitting.
@@ -300,5 +300,43 @@ This gives rise to 24 combinations. We will train the neural network on all of t
 \subsubsection{Code Implementation}
 
 To implement this neural network, we will use Keras\footnote{https://keras.io/}, which is a library that sits on top of Theano\footnote{http://deeplearning.net/software/theano/} and TensorFlow\footnote{https://tensorflow.org}. We will be using the Theano backend.
+
+A neural network is created for all 24 combinations. A single function automatically generates a neural network given a combination. The naming convention for each model is ``\textit{no\_neurons\_\_batch\_norm\_\_no\_units}''. Here's an example:
+
+\begin{enumerate}
+\item{\textbf{No. of training units:} 2}
+\item{\textbf{No. of neurons in dense layer:} 200}
+\item{\textbf{Batch normalization:} True}
+\end{enumerate}
+
+In this case, the model will be named ``200\_True\_2''. The model will be saved to disk as ``200\_True\_2.h5'', and the log of training would be saved as ``200\_True\_2.h5.log''.
+
+\subsubsection{Final performance}
+
+The model that performed the best, with test accuracy of \textbf{82.783\%} has the following characteristics:
+
+\begin{enumerate}
+\item{Number of training units: 6}
+\item{Number of neurons in the dense layer: 300}
+\item{Batch normalization: True}
+\end{enumerate}
+
+The baseline solution had an accuracy of $65.153\%$ on the test set.
+
+\subsubsection{Performance of intermediate models}
+
+Let's look at how the 23 other neural network combinations performed.
+
+\noindent\includegraphics{perf_batch_off}\\
+\noindent\includegraphics{perf_batch_on}
+
+\newpage
+The following observations can be made:
+
+\begin{enumerate}
+\item{The best performance with batch normalization OFF is \textbf{78.76\%}. With ON, it's \textbf{82.78\%}. There's a \textbf{4.02\%} improvement.}
+\item{With batch normalization ON, the lowest test accuracy is \textbf{81.30\%}, and the highest test accuracy is \textbf{82.78\%}. Tuning of hyperparameters has lead to a \textbf{1.48\%} improvement in accuracy.}
+\end{enumerate}
+
 
 \end{document}
