@@ -297,6 +297,10 @@ To find the right network topology that will improve accuracy, we will try a cou
 
 This gives rise to 24 combinations. We will train the neural network on all of those topologies. The number of epochs is set to 25, because that is the maximum I have the resources to train 24 neural networks on. However, the training and validation accuracy of each epoch is put in a log, so that we can always check later for patterns of overfitting.
 
+\subsubsection{Loss \& Optimization}
+
+Binary crossentropy is used as a loss metric, since it's a binary classification problem. I used the adam optimizer, so as to avoid having to tune a lot of hyperparameters related to the optimizer by hand.
+
 \subsubsection{Code Implementation}
 
 To implement this neural network, we will use Keras\footnote{https://keras.io/}, which is a library that sits on top of Theano\footnote{http://deeplearning.net/software/theano/} and TensorFlow\footnote{https://tensorflow.org}. We will be using the Theano backend.
@@ -337,6 +341,34 @@ The following observations can be made:
 \item{The best performance with batch normalization OFF is \textbf{78.76\%}. With ON, it's \textbf{82.78\%}. There's a \textbf{4.02\%} improvement.}
 \item{With batch normalization ON, the lowest test accuracy is \textbf{81.30\%}, and the highest test accuracy is \textbf{82.78\%}. Tuning of hyperparameters has lead to a \textbf{1.48\%} improvement in accuracy.}
 \end{enumerate}
+
+\section{Results}
+\subsection{Model Evaluation, Validation, and Justification}
+
+As mentioned previously, the model that performed best had the following characteristics, and a final test accuracy of \textbf{82.783\%}:
+
+\begin{enumerate}
+\item{Number of training units: 6}
+\item{Number of neurons in the dense layer: 300}
+\item{Batch normalization: True}
+\end{enumerate}
+
+The baseline solution had an accuracy of $65.153\%$ on the test set. Thus the neural network solution gave an improvement of \textbf{17.63\%} over the benchmark (that just naively compared bag of words and calculated the Jaccard index).
+
+This final model had the following characteristics after 25 epochs (this data is obtained from ``300\_True\_6.h5.log''):
+
+\begin{enumerate}
+\item{Training accuracy: 91.300\%}
+\item{Validation accuracy: 82.370\%}
+\item{Test accuracy: 82.783\%}
+\end{enumerate}
+
+The training accuracy is higher than the validation/test accuracy, so the model is slightly over-fitting. The validation and test accuracy are close to each other, so the model does generalize well to unseen data. Given the accuracy score, we can say that the model has helped in solve the problem.
+
+With more amount of training data, the accuracy can be improved further. With significantly more data, custom GloVe vectors can be trained instead of using a pre-trained model. This would ensure that the vectors reflect the nature of the data the duplicate detector will run on.
+
+\section{Conclusion}
+
 
 
 \end{document}
