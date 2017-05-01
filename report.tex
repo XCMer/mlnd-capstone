@@ -95,4 +95,65 @@ For example, if question "1" is a duplicate of question "2", and question "2" is
 
 Which is why the question IDs won't be used as a feature for the duplicate detector, but is still important for the system using the duplicate detector.
 
+\subsubsection{Summary statistics}
+
+Below are some basic summary statistics:
+
+\begin{enumerate}
+\item{\textbf{Total entries:} 4,04,290}
+\item{\textbf{Total positive entries:} 1,49,263}
+\item{\textbf{Total negative entries:} 2,55,027}
+\item{\textbf{Percent positive entries:} 36.91\%}
+\item{\textbf{Percent negative entries:} 63.08\%}
+\end{enumerate}
+
+We have a sample with more negative than positive examples.
+
+\subsection{Exploratory Visualization}
+
+\subsubsection{Summary visualization}
+
+Let's look at the class distribution (duplicate or not). This is the same from our summary statistics.
+
+\noindent\includegraphics[width=\textwidth]{category_plot}
+
+\subsubsection{Word count differences}
+
+Let's look at if word count has any bearing on whether a question is marked as duplicate or not, or can we discern any important facts/patterns.
+
+\noindent\includegraphics[width=\textwidth]{diff_wordcount_duplicate}
+\noindent\includegraphics[width=\textwidth]{diff_wordcount_non_duplicate}
+
+\begin{enumerate}
+\item{For duplicates, the word count difference tapers smoothly}
+\item{For non-duplicates, there is a sharp decrease in the 2nd bin}
+\item{There are question pairs that have word count difference 75 and above, and are still duplicates. So simple bag of words model will not work. \textit{This is the most important conclusion.}}
+\end{enumerate}
+
+\subsubsection{Jaccard index}
+
+To explore a baseline model, let's look at the bag-of-words similarity of duplicate and non-duplicate question pairs using the Jaccard Index\footnote{https://en.wikipedia.org/wiki/Jaccard\_index}. The relevant formula is:
+
+$$
+J(A,B) = \frac{A \cap B}{A \cup B}
+$$
+
+In our case, A and B refer to individual words in the question pairs. So, the formula basically is:
+
+$$
+J(A,B) = \frac{\text{No. of common words in question1 and question2}}{\text{No. of unique words in question1 and question2 combined}}
+$$
+
+Let's look at the Jaccard similarity of duplicate and non-duplicate question pairs separately.
+
+\noindent\includegraphics[width=\textwidth]{jaccard_duplicate}
+\noindent\includegraphics[width=\textwidth]{jaccard_non_duplicate}
+
+\begin{enumerate}
+\item{For duplicates, Jaccard similarity is like a gamma distribution. Jaccard is bad at predicting a pair is a duplicate.}
+\item{For non-duplicates, the distribution is again gamma but with a right skew. So Jaccard positively gives low scores for most of the non-duplicates.}
+\end{enumerate}
+
+We had previously concluded from the word counts that bag-of-words similarity will not be a good method of differentiating between duplicates and non-duplicates, and the two graphs above confirm the fact.
+
 \end{document}
