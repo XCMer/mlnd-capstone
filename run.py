@@ -36,7 +36,7 @@ while True:
     prediction = model.predict([q1, q2])
     p1 = prediction[0][0]
     p2 = prediction[1][0]
-    p = (p1 + p2) / 2.0
+    p = max(p1, p2)
 
     print("Score: {}".format(str(p)))
 
