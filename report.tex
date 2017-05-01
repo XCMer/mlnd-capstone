@@ -91,9 +91,9 @@ The columns correspond to the following features:
 \end{enumerate}
 
 \subsubsection{Why do we have question IDs for each pair?}
-There are two columns of interest, "qid1" and "qid2" that are of interest. The algorithm that we're going to design will only tell us if a given pair of question is a duplicate. However, given a question, we'd also like to find out all the duplicates of it in the system.
+There are two columns of interest, ``qid1'' and ``qid2'' that are of interest. The algorithm that we're going to design will only tell us if a given pair of question is a duplicate. However, given a question, we'd also like to find out all the duplicates of it in the system.
 
-For example, if question "1" is a duplicate of question "2", and question "2" is a duplicate of "3", then a system should also know that "1" and "3" are duplicates. Data structures like "union find" allow us to do that. However, this is not in scope of the algorithm that we'll design, but the responsibility of the higher system that will use this duplicate detector.
+For example, if question ``1'' is a duplicate of question ``2'', and question ``2'' is a duplicate of ``3'', then a system should also know that ``1'' and ``3'' are duplicates. Data structures like ``union find'' allow us to do that. However, this is not in scope of the algorithm that we'll design, but the responsibility of the higher system that will use this duplicate detector.
 
 Which is why the question IDs won't be used as a feature for the duplicate detector, but is still important for the system using the duplicate detector.
 
@@ -167,7 +167,7 @@ The inputs to our algorithm are two variable length strings. In NLP (Natural Lan
 \noindent\textbf{Bag of words:}\\
 Here, every word is assigned a unique number. The input to any ML algorithm then becomes a one-hot encoded array of numbers that correspond to these words.
 
-For example, if the input corpus has two words: "hello" and "world". And we assign 0 to "hello" and 1 to "world". Then, the word "hello" would be represented as $[1\ 0]$ while "world" would be represented as $[0\ 1]$. (one hot encoded).
+For example, if the input corpus has two words: ``hello'' and ``world''. And we assign 0 to ``hello'' and 1 to ``world''. Then, the word ``hello'' would be represented as $[1\ 0]$ while ``world'' would be represented as $[0\ 1]$. (one hot encoded).
 
 The number of features become equal to the number of unique words in the corpus (training set).
 \\\\
@@ -220,5 +220,85 @@ A Batch Normalization layer shifts the inputs from the previous layer to have ze
 In the field of Information Retrieval, there is a problem called Near Duplicate Detection.\footnote{https://nlp.stanford.edu/IR-book/html/htmledition/near-duplicates-and-shingling-1.html} Jaccard Similarity of bag-of-words ($k=1$ shinglings) is one way of finding near duplicates.\footnote{http://stackoverflow.com/questions/23053688/how-to-detect-duplicates-among-text-documents-and-return-the-duplicates-similar}
 
 Since we split Quora dataset into 10\% test set, this benchmark model would be run on the test set. This baseline model gives an accuracy of $65.153\%$.
+
+
+\section{Methodology}
+
+\subsection{Data Pre-processing}
+
+The Quora training dataset \textit{train.csv} is assumed to be in the same directory as the Jupyter Notebook.\footnote{Quora De-duplication.ipynb} The structure of the dataset is as in the exploration.
+
+\subsubsection{Feature selection}
+
+Out of all the columns in the dataset, we will use the following features:
+
+\begin{enumerate}
+\item{\textbf{question1:} Text of the first question in the pair}
+\item{\textbf{question2:} Text of the second question in the pair}
+\end{enumerate}
+
+\noindent And the target variable:
+
+\begin{enumerate}
+\item{\textbf{is\_duplicate:} Whether the question pair is a duplicate or not. $1$ if it is, $0$ if it is not.}
+\end{enumerate}
+
+\subsubsection{Feature transformation}
+
+A question from a question pair would go through the following transformations. For the examples below, we'll assume that the input text is ``This is a sentence'.'
+\\\\
+\textbf{Step 1: Tokenize text into words}\\
+Using spaCy, we will convert a text like ``This is a sentence'' into words (tokens) like: ``This'' ``is'' ``a'' ``sentence''
+\\\\
+\textbf{Step 2: Get GloVe vectors for each word}\\
+For every word, we get a GloVe vector of length $300$. Thus, we get a matrix of size $\textit{no. of tokens} \times 300$. In the case of our example sentence, it will be a matrix of size $4 \times 300$. This looks as shown below:\\\\
+
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+This     & 0 & 0 & ... & 0 \\ \hline
+is       & 0 & 0 & ... & 0 \\ \hline
+a        & 0 & 0 & ... & 0 \\ \hline
+sentence & 0 & 0 & ... & 0 \\ \hline
+\end{tabular}\\\\
+
+\noindent\textbf{Step 3: Mean pooling}\\
+The $n \times 300$ matrix is now converted into a $1 \times 300$ matrix by taking the mean of all the columns.\\
+
+\noindent\textbf{Step 4: Max pooling}\\
+The same $n \times 300$ matrix is converted again into a $1 \times 300$ matrix, but by taking the max from all the columns.\\
+
+\noindent\textbf{Step 5: Concatenate mean and max. pooling}\\
+The mean and max pool are concatenated into a matrix of size $1 \times 600$.
+
+We repeat the above step for every question in every question pairs. This concludes our data pre-processing step. For our neural network, we will have two vectors of size $600$ as inputs.
+
+\subsection{Implementation \& Refinement}
+
+\subsubsection{Structure of the Neural Network}
+
+\noindent\includegraphics[width=\textwidth]{neural_network}
+
+The following are the characteristics of this network:
+
+\begin{enumerate}
+\item{There are two inputs to the network, which are the $1 \times 600$ feature for each of the question in a pair.}
+\item{These inputs are concatenated into one layer of size $1 \times 1200$.}
+\item{A learning unit consists of a dense layer with ReLU activation, preceded by batch normalization.}
+\item{The final layer is a dense layer with 1 neuron and sigmoid activation. This reflects the probability that a question pair is a duplicate.}
+\end{enumerate}
+
+To find the right network topology that will improve accuracy, we will try a couple of combinations.
+
+\begin{enumerate}
+\item{Number of training units: 2, 4, 6, 8}
+\item{Number of neurons in the dense layer: 100, 200, 300}
+\item{Batch normalization: On, Off}
+\end{enumerate}
+
+This gives rise to 24 combinations. We will train the neural network on all of those topologies. The number of epochs is set to 25, because that is the maximum I have the resources to train 24 neural networks on. However, the training and validation accuracy of each epoch is put in a log, so that we can always check later for patterns of overfitting.
+
+\subsubsection{Code Implementation}
+
+To implement this neural network, we will use Keras\footnote{https://keras.io/}, which is a library that sits on top of Theano\footnote{http://deeplearning.net/software/theano/} and TensorFlow\footnote{https://tensorflow.org}. We will be using the Theano backend.
 
 \end{document}
