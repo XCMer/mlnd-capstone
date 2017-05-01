@@ -369,6 +369,58 @@ With more amount of training data, the accuracy can be improved further. With si
 
 \section{Conclusion}
 
+\subsection{Free-form Visualization}
 
+The most important quality of interest is the ability to recognize entities in the question. I've come up with these questions myself as an experiment. For example, Quora reviewers consider the following to be NOT duplicate:
+\\\\
+\begin{tabular}{|l|l|}
+\hline
+Question 1 & What is the salary in the US? \\ \hline
+Question 2 & What is the salary in Germany? \\ \hline
+Human opinion & NOT DUPLICATE \\ \hline
+Model's prediction & NOT DUPLICATE \\ \hline
+\end{tabular}\\
+
+The reason they're not duplicates is because they talk about two different countries, even though most of the keywords in the question are the same. Our model gets it right.
+
+On the flipside, let's look at a pair of question that ask the same thing but in different words:
+\\\\
+\begin{tabular}{|l|l|}
+\hline
+Question 1 & How to learn programming? \\ \hline
+Question 2 & How do I become good at programming? \\ \hline
+Human opinion & DUPLICATE \\ \hline
+Model's prediction & DUPLICATE \\ \hline
+\end{tabular}\\
+\\\\
+\begin{tabular}{|l|l|}
+\hline
+Question 1 & Where do I go in Germany? \\ \hline
+Question 2 & What are some good places to visit in Germany? \\ \hline
+Human opinion & DUPLICATE \\ \hline
+Model's prediction & DUPLICATE \\ \hline
+\end{tabular}\\
+
+Word vectors helps our model recognize the basic intents behind each question, and thus categorize similar words as one. Let's change the name of the country in the above example, and the question is no longer classified as duplicate. Thus the names of entities do matter a lot to the model.
+\\\\
+\begin{tabular}{|l|l|}
+\hline
+Question 1 & Where do I go in Germany? \\ \hline
+Question 2 & What are some good places to visit in India? \\ \hline
+Human opinion & NOT DUPLICATE \\ \hline
+Model's prediction & NOT DUPLICATE \\ \hline
+\end{tabular}\\
+
+One problem of using pre-trained word vectors, is that they can flag entities as similar if they were commonly used together in the GloVe's training corpus. For example:
+\\\\
+\begin{tabular}{|l|l|}
+\hline
+Question 1 & Where do I go in Germany? \\ \hline
+Question 2 & What are some good places to visit in France? \\ \hline
+Human opinion & NOT DUPLICATE \\ \hline
+Model's prediction & DUPLICATE \\ \hline
+\end{tabular}\\
+
+Here, the model incorrectly predicts them as duplicate. This is because France and Germany might have appeared in close contexts in the GloVe's training set, and GloVe thinks that both of those words have a strong connection, since they're both European countries. This type of false positives are very detrimental to the user experience.
 
 \end{document}
