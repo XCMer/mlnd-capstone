@@ -454,4 +454,14 @@ I believe this final model does generalise well to these types of problem. The t
 
 \subsection {Improvement}
 
+\subsubsection{Usage of LSTMs}
+
+In Neural Networks, there is a type of Recurrent Neural Network called LSTM (Long Short-Term Memory).\footnote{http://colah.github.io/posts/2015-08-Understanding-LSTMs/} \footnote{http://karpathy.github.io/2015/05/21/rnn-effectiveness/} Currently, the inputs to the network are of fixed size. To make this possible, we apply mean and max pooling, which results in loss of information.
+
+LSTMs would allow me to convert all questions into a comparable sequence of word vectors. Whether this would result in a higher accuracy or not is something that will have to be thoroughly tested.
+
+\subsubsection{Training custom GloVe vectors}
+
+Earlier, we noticed that the model thought that ``Germany'' and ``France'' were similar, and erroneously marked the questions as duplicate. We can train our custom GloVe vectors on the Quora corpus directly, which can potentially get rid of this problem. However, we will need much more data than we already have.
+
 \end{document}
