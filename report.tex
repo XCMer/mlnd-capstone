@@ -315,6 +315,12 @@ A neural network is created for all 24 combinations. A single function automatic
 
 In this case, the model will be named ``200\_True\_2''. The model will be saved to disk as ``200\_True\_2.h5'', and the log of training would be saved as ``200\_True\_2.h5.log''.
 
+\subsubsection{Order of questions in a pair}
+
+In the code implementation, the order of question in a pair matters and can give slightly different, or very different scores. For this reason, the question is passed through the network in the given and reverse order. I then take the minimum of the two.
+
+The reason minimum instead of maximum is taken, is so that the system errs on the side of false negatives instead of false positives. False positives are not acceptable in the system.
+
 \subsubsection{Final performance}
 
 The model that performed the best, with test accuracy of \textbf{82.783\%} has the following characteristics:
