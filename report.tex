@@ -421,6 +421,37 @@ Human opinion & NOT DUPLICATE \\ \hline
 Model's prediction & DUPLICATE \\ \hline
 \end{tabular}\\
 
-Here, the model incorrectly predicts them as duplicate. This is because France and Germany might have appeared in close contexts in the GloVe's training set, and GloVe thinks that both of those words have a strong connection, since they're both European countries. This type of false positives are very detrimental to the user experience.
+Here, the model incorrectly predicts them as duplicate. This is because France and Germany might have appeared in close contexts in the GloVe's training set, and GloVe thinks that both of those words have a strong connection, since they're both European countries.
+
+This can be verified by computing the GloVe similarity between ``France'' and ``Germany'':
+
+\noindent\includegraphics[width=\textwidth]{france_germany_similarity}
+
+We can see a 68.5\% similarity between the two words, hence this explains the problem that we had with our last question pair. This type of false positives are very detrimental to the user experience.
+
+
+\subsection{Reflection}
+
+This entire project was about supervised learning. We had a target variable, and some form of primitive features. However, being a Natural Language Processing task, features had to be extracted from the text first.
+
+\subsubsection{Feature extraction}
+
+This aspect was the most important. Text is variable sized and arbitrary. Machine learning algorithms deal with numeric features. I explored the two commonly used option to go from text to numeric features, bag of words, and word vectors. The quality that made word vectors attractive was the fact that it could express similarity between words. So, not all the words in the dictionary needed to be present in the training corpus of the duplicate detector. The model could relate words it has never seen to words that it did see during training using word vectors.
+
+The second point was getting to a fixed feature size from a variable length text. This is where max and mean pooling came in. Once every question has been converted into fixed length features, then it became ready for any ML algorithm to be applied.
+
+\subsubsection{Training}
+
+Due to the popularity and performance of deep neural networks in NLP, I decided to go with that route. However, the topology of the network has many possibilities. Although with experience, one can predict what kind of topology would be ideal, I decided to train on all combinations to find out what kind of improvement each factor brings in.
+
+It took days to train all 24 network, but the results were worth the wait. Batch Normalization came out to be an important technique to improve accuracy.
+
+\subsubsection{Interesting aspects of the problem}
+
+Whether two questions are duplicate or not, does not depend on just the words that they use, but the intent of the question. As we observed in the Free-form Visualization section, questions can be framed differently, but can still be duplicates, and can be flagged as such. Entities become important, since changing them can change the duplicate detector's analysis.
+
+I believe this final model does generalise well to these types of problem. The training corpus can be augmented, or we can get a different one depending on the domain, and the model will perform well for that domain. The only pre-requisite is that most of the words used in a domain should have GloVe vectors. For common scenarios, we can use a pre-trained one, or else we can train one on our own from the training corpus.
+
+\subsection {Improvement}
 
 \end{document}
